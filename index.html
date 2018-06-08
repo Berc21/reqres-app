@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Test</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/meyer-reset/2.0/reset.css">
+  <style>
+    .heading {
+      text-align: center;
+      font-size: 32px;
+      padding: 10px 20px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+      margin-bottom: 20px;
+      background: #006db3;
+      color: white;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 960px;
+      margin-left: auto;
+      margin-right: auto;
+      display: flex;
+      flex-wrap: wrap;
+    }
+
+    @keyframes slide {
+      0% {
+        transform: translateY(-15%);
+      }
+      100% {
+        transform: translateY(0);
+      }
+    }
+
+    .card {
+      box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+      transition: 0.3s;
+      width: 300px;
+      max-width: 100%;
+      border-radius: 5px;
+      margin-left: 20px;
+      margin-bottom: 20px;
+      animation: 0.3s ease-out 0s 1 slide;
+    }
+
+    .card h4 {
+      font-size: 20px;
+    }
+
+    .card:hover {
+      box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2);
+    }
+
+    img {
+      border-radius: 5px 5px 0 0;
+    }
+
+    .name-wrapper {
+      padding: 20px 32px;
+      text-align: center;
+    }
+
+    #more-button {
+      display: block;
+      margin: 30px auto;
+      padding: 15px 30px;
+      font-size: 16px;
+      overflow: hidden;
+      border-width: 0;
+      outline: none;
+      border-radius: 2px;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, .6);
+
+      background-color: #006db3;
+      color: #ecf0f1;
+
+      transition: background-color .3s;
+    }
+
+    .addUserButton {
+      border: none;
+      margin: 0;
+      padding: 0;
+      width: auto;
+      overflow: visible;
+
+      background: transparent;
+      width: 70px;
+      height: 70px;
+      background-color: #00701a;
+      border-radius: 50%;
+      box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
+      transition: all 0.3s cubic-bezier(.25, .8, .25, 1);
+
+      font-size: 50px;
+      line-height: 70px;
+      color: white;
+      text-align: center;
+
+      position: fixed;
+      right: 50px;
+      bottom: 50px;
+    }
+
+    .addUserButton:hover {
+      box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2);
+    }
+  </style>
+
+
+</head>
+
+<body>
+
+  <main>
+
+    <h1 class="heading">User List</h1>
+
+    <section id="userlist" class="container">
+
+      <!-- 
+        <div class="card">
+          <img src="https://s3.amazonaws.com/uifaces/faces/twitter/josephstein/128.jpg" alt="Avatar" style="width:100%">
+          <div class="name-wrapper">
+            <h4 class="name">
+              <b>Janet Weaver</b>
+            </h4>
+          </div>
+        </div>
+        </div>
+        <div class="card">
+          <img src="https://s3.amazonaws.com/uifaces/faces/twitter/josephstein/128.jpg" alt="Avatar" style="width:100%">
+          <div class="name-wrapper">
+            <h4 class="name">
+              <b>Janet Weaver</b>
+            </h4>
+          </div>
+      </div>
+-->
+
+
+    </section>
+
+    <section class="container" style="justify-content: center;">
+      <button id="more-button" onclick="nextPage()"> Load More</button>
+    </section>
+
+    <section>
+      <button class="addUserButton"> + </button>
+    </section>
+
+  </main>
+
+  <script>
+    /**
+                                                                            * Simple Fetch that puts first name to body
+                                                                              fetch("http://localhost:5000/api/users").then(res => res.json()).then(result =>  result.data.map ( object => document.body.innerHTML += object.first_name + '<br> <br>')  );
+                                                                           */
+
+
+    /**
+     * Simple Fetch that puts name and color to body as div
+        fetch("http://localhost:5000/api/list").then(res => res.json()).then(result =>  result.data.map ( object => document.body.innerHTML +=  `<div style="color:${object.color};">${object.name} </div>`  )  );
+    */
+
+
+
+    // select dom 
+    let page;
+    let maxPage;
+    const userlist = document.getElementById('userlist');
+    const userCardMarkup = (first_name, last_name, avatar) =>
+      `<div class="card">
+        <img src="${avatar}" alt="Avatar" style="width:100%;height:auto;">
+        <div class="name-wrapper">
+          <h4 class="name">
+            <b>${first_name } ${last_name}</b>
+          </h4>
+        </div>
+      </div>
+      `
+
+
+    function getUser() {
+
+      if (page === undefined) page = 1;
+
+      const allUserApi = `http://localhost:5000/api/users?page=${page}`;
+
+      fetch(allUserApi).
+      then(res => res.json()).
+      then(result => {
+        page = result.page;
+        maxPage = result.total_pages;
+        result.data.map(
+          object => userlist.insertAdjacentHTML('beforeend', userCardMarkup(object.first_name,
+            object.last_name, object.avatar
+          )));
+
+      });
+    }
+
+    function nextPage() {
+      if (page < maxPage) {
+        page++
+
+        const allUserApi = `http://localhost:5000/api/users?page=${page}`;
+
+        fetch(allUserApi).
+        then(res => res.json()).
+        then(result => {
+          page = result.page;
+          result.data.map(
+            object => userlist.insertAdjacentHTML('beforeend', userCardMarkup(object.first_name,
+              object.last_name, object.avatar
+            )));
+          console.log(page)
+        });
+      }
+      let moreButton = document.getElementById('more-button');
+      if (maxPage === page) moreButton.style.display = "none";
+
+
+    }
+
+    document.addEventListener("DOMContentLoaded", function (event) {
+      getUser();
+    });
+
+    const url = 'http://localhost:5000/api/users';
+    const data = {
+      "name": "morpheus",
+      "job": "leader"
+    }
+
+    fetch(url, {
+        method: 'POST', // or 'PUT'
+        body: JSON.stringify(data), // data can be `string` or {object}!
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      }).then(res => res.json())
+      .catch(error => console.error('Error:', error))
+      .then(response => console.log('Success:', response));
+  </script>
+
+</body>
+
+</html>
